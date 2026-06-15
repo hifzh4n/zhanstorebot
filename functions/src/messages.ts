@@ -16,8 +16,7 @@ export const productMessage = (product: Product): string => {
     "4. After approval, you will receive a Malaysia phone number.\n" +
     `5. Use the phone number in the ${product.brand} app.\n` +
     "6. Request OTP in the app.\n" +
-    "7. Click Check OTP here.\n" +
-    "8. Bot will send the OTP once received.\n\n" +
+    "7. Bot will send the OTP automatically once received.\n\n" +
     "Click below to proceed.";
 };
 
@@ -33,7 +32,7 @@ export const tutorialMessage = (product: Product): string => {
     "6. Choose login/register with phone number.\n" +
     "7. Enter the phone number from the bot.\n" +
     "8. Request OTP in the app or website.\n" +
-    "9. Return to this bot and tap Check OTP.\n" +
+    "9. Wait here. The bot will send the OTP automatically.\n" +
     "10. Use the OTP in the app before it expires.\n\n" +
     "If you are stuck, contact admin from the button below.";
 };
@@ -90,7 +89,8 @@ export const approvedMessage = (order: Order): string => {
     "Your phone number is ready:\n\n" +
     `${order.phoneNumber ?? ""}\n\n` +
     `Use this number to register in the ${order.brand} app.\n` +
-    "After you request OTP in the app, click Check OTP below.";
+    "After you request OTP in the app, wait here.\n" +
+    "The bot will send the OTP automatically once it arrives.";
 };
 
 export const rejectedMessage = (reason: string): string => {

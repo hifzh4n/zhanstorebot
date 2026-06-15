@@ -146,3 +146,11 @@ export const listAutoCompletableOrders = async (): Promise<Order[]> => {
     .get();
   return snap.docs.map((doc) => doc.data() as Order);
 };
+
+export const listWaitingOtpOrders = async (): Promise<Order[]> => {
+  const snap = await orders
+    .where("status", "==", "WAITING_OTP")
+    .limit(50)
+    .get();
+  return snap.docs.map((doc) => doc.data() as Order);
+};

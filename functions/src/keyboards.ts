@@ -57,8 +57,6 @@ export const activeOrderKeyboard = (order: Order): InlineKeyboard => {
 
 export const otpKeyboard = (orderId: string): InlineKeyboard => {
   return new InlineKeyboard()
-    .text("Check OTP", `otp:check:${orderId}`)
-    .row()
     .text("Need Help", `order:help:${orderId}`);
 };
 

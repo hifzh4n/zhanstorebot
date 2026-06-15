@@ -5,18 +5,20 @@ import * as logger from "firebase-functions/logger";
 import {Timestamp} from "firebase-admin/firestore";
 import {telegramWebhook, bot} from "./bot";
 import {db} from "./firebase";
-import {otpKeyboard, rejectedKeyboard} from "./keyboards";
-import {approvedMessage, rejectedMessage} from "./messages";
+import {completeKeyboard, otpKeyboard, rejectedKeyboard} from "./keyboards";
+import {approvedMessage, otpReceivedMessage, rejectedMessage} from "./messages";
 import {MockSmsService} from "./services/mock-sms.service";
 import {SmsCodeService} from "./services/smscode.service";
 import {
   addOrderLog,
   getOrder,
   listAutoCompletableOrders,
+  listWaitingOtpOrders,
   updateOrder,
 } from "./services/order.service";
 import {seedProducts} from "./services/product.service";
-import {seedSettings} from "./services/settings.service";
+import {getAppSettings, seedSettings} from "./services/settings.service";
+import {Order} from "./types/order";
 
 setGlobalOptions({maxInstances: 10, region: "asia-southeast1"});
 
@@ -128,6 +130,7 @@ export const approvePayment = onCall(async (request) => {
     await bot.api.sendMessage(updated.telegramChatId, approvedMessage(updated), {
       reply_markup: otpKeyboard(orderId),
     });
+    await pollOrderOtp(updated);
   }
   return {ok: true};
 });
@@ -136,6 +139,78 @@ const envSmsProvider = () => {
   return process.env.SMS_PROVIDER === "smscode" ?
     new SmsCodeService() :
     new MockSmsService();
+};
+
+const pollOrderOtp = async (order: Order): Promise<void> => {
+  const settings = await getAppSettings();
+  if (order.lastOtpCheckAt) {
+    const seconds = (Date.now() - order.lastOtpCheckAt.toMillis()) / 1000;
+    if (seconds < settings.otpCooldownSeconds) {
+      return;
+    }
+  }
+  if (order.otpAttempts >= settings.otpMaxAttempts) {
+    await updateOrder(order.orderId, {status: "OTP_ATTEMPT_LIMIT_REACHED"});
+    await addOrderLog(
+      order.orderId,
+      "OTP_ATTEMPT_LIMIT_REACHED",
+      "Automatic OTP polling reached the maximum attempts",
+    );
+    return;
+  }
+
+  await updateOrder(order.orderId, {
+    otpAttempts: order.otpAttempts + 1,
+    lastOtpCheckAt: Timestamp.now(),
+  });
+  await addOrderLog(order.orderId, "OTP_AUTO_CHECKED",
+    "System checked OTP automatically");
+
+  const result = await envSmsProvider().getOtp({
+    smsOrderId: order.smsOrderId ?? order.orderId,
+    orderId: order.orderId,
+  });
+  if (!result.success) {
+    await updateOrder(order.orderId, {
+      errorMessage: result.errorMessage ?? "OTP check failed",
+    });
+    await addOrderLog(order.orderId, "OTP_AUTO_CHECK_FAILED",
+      result.errorMessage ?? "Automatic OTP check failed");
+    return;
+  }
+  if (!result.isReady || !result.otpCode) {
+    return;
+  }
+
+  const autoCompleteAt = Timestamp.fromMillis(
+    Date.now() + settings.autoCompleteMinutes * 60 * 1000,
+  );
+  let shouldNotify = false;
+  await db.runTransaction(async (transaction) => {
+    const ref = db.collection("orders").doc(order.orderId);
+    const snap = await transaction.get(ref);
+    if (snap.get("status") !== "WAITING_OTP") {
+      return;
+    }
+    transaction.set(ref, {
+      status: "OTP_RECEIVED",
+      otpCode: result.otpCode,
+      otpReceivedAt: Timestamp.now(),
+      autoCompleteAt,
+      updatedAt: Timestamp.now(),
+    }, {merge: true});
+    shouldNotify = true;
+  });
+  if (!shouldNotify) {
+    return;
+  }
+
+  await addOrderLog(order.orderId, "OTP_RECEIVED",
+    "OTP received automatically");
+  await bot.api.sendMessage(order.telegramChatId,
+    otpReceivedMessage(result.otpCode), {
+      reply_markup: completeKeyboard(order.orderId),
+    });
 };
 
 export const rejectPayment = onCall(async (request) => {
@@ -366,6 +441,23 @@ export const logAdminEvent = onCall(async (request) => {
   });
   return {ok: true};
 });
+
+export const pollPendingOtps = onSchedule(
+  "every 1 minutes",
+  async () => {
+    const orders = await listWaitingOtpOrders();
+    await Promise.all(orders.map(async (order) => {
+      try {
+        await pollOrderOtp(order);
+      } catch (error) {
+        logger.warn("Failed to poll OTP", {
+          orderId: order.orderId,
+          error,
+        });
+      }
+    }));
+  },
+);
 
 export const autoCompleteOrders = onSchedule(
   "every 1 minutes",
