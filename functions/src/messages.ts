@@ -108,6 +108,15 @@ export const otpReceivedMessage = (otpCode: string): string => {
     "If everything is okay, you may click Complete now.";
 };
 
+export const orderFailedMessage = (order: Order, reason?: string): string => {
+  return "Order failed\n\n" +
+    `Order ID: ${order.orderId}\n` +
+    `Product: ${order.productName}\n\n` +
+    "Sorry, we could not continue this order automatically.\n" +
+    (reason ? `Reason: ${reason}\n\n` : "\n") +
+    `Please contact admin for help: ${env.adminTelegramUsername}`;
+};
+
 export const helpMessage = "Need help?\n\nPlease contact admin directly:\n" +
   env.adminTelegramUsername;
 

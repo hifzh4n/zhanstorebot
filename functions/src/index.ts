@@ -6,7 +6,12 @@ import {Timestamp} from "firebase-admin/firestore";
 import {telegramWebhook, bot} from "./bot";
 import {db} from "./firebase";
 import {completeKeyboard, otpKeyboard, rejectedKeyboard} from "./keyboards";
-import {approvedMessage, otpReceivedMessage, rejectedMessage} from "./messages";
+import {
+  approvedMessage,
+  orderFailedMessage,
+  otpReceivedMessage,
+  rejectedMessage,
+} from "./messages";
 import {MockSmsService} from "./services/mock-sms.service";
 import {SmsCodeService} from "./services/smscode.service";
 import {
@@ -112,11 +117,14 @@ export const approvePayment = onCall(async (request) => {
     orderId,
   });
   if (!result.success || !result.phoneNumber) {
+    const reason = result.errorMessage ?? "Phone number request failed";
     await updateOrder(orderId, {
       status: "FAILED",
-      errorMessage: result.errorMessage ?? "Phone number request failed",
+      errorMessage: reason,
     });
-    throw new HttpsError("internal", "Phone number request failed.");
+    await addOrderLog(orderId, "ORDER_FAILED", reason);
+    await notifyOrderFailed(order, reason);
+    throw new HttpsError("internal", reason);
   }
   await updateOrder(orderId, {
     status: "WAITING_OTP",
@@ -141,6 +149,29 @@ const envSmsProvider = () => {
     new MockSmsService();
 };
 
+const notifyOrderFailed = async (
+  order: Order,
+  reason?: string,
+): Promise<void> => {
+  try {
+    await bot.api.sendMessage(
+      order.telegramChatId,
+      orderFailedMessage(order, reason),
+    );
+    await addOrderLog(order.orderId, "USER_NOTIFIED_FAILED",
+      "User notified about failed order");
+  } catch (error) {
+    logger.warn("Failed to notify user about failed order", {
+      orderId: order.orderId,
+      error,
+    });
+    await addOrderLog(order.orderId, "USER_NOTIFY_FAILED",
+      "Failed to notify user about failed order", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+  }
+};
+
 const pollOrderOtp = async (order: Order): Promise<void> => {
   const settings = await getAppSettings();
   if (order.lastOtpCheckAt) {
@@ -150,12 +181,17 @@ const pollOrderOtp = async (order: Order): Promise<void> => {
     }
   }
   if (order.otpAttempts >= settings.otpMaxAttempts) {
-    await updateOrder(order.orderId, {status: "OTP_ATTEMPT_LIMIT_REACHED"});
+    const reason = "OTP was not received after the maximum check attempts.";
+    await updateOrder(order.orderId, {
+      status: "OTP_ATTEMPT_LIMIT_REACHED",
+      errorMessage: reason,
+    });
     await addOrderLog(
       order.orderId,
       "OTP_ATTEMPT_LIMIT_REACHED",
       "Automatic OTP polling reached the maximum attempts",
     );
+    await notifyOrderFailed(order, reason);
     return;
   }
 
