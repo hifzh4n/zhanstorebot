@@ -4,6 +4,8 @@ import {db} from "../firebase";
 
 export interface AppSettings {
   isMaintenanceMode: boolean;
+  adminTelegramUsername: string;
+  adminTelegramChatId: string;
   mockPhoneNumber: string;
   mockOtp: string;
   otpCooldownSeconds: number;
@@ -16,21 +18,26 @@ export const seedSettings = async (): Promise<void> => {
   const snap = await ref.get();
   const now = Timestamp.now();
   if (snap.exists) {
-    await ref.set(
-      {
-        adminTelegramUsername: env.adminTelegramUsername,
-        adminTelegramChatId: env.adminTelegramChatId,
-        duitNowQrStoragePath: env.duitNowQrStoragePath,
-        smsProvider: env.smsProvider,
-        mockPhoneNumber: env.mockPhoneNumber,
-        mockOtp: env.mockOtp,
-        otpCooldownSeconds: env.otpCooldownSeconds,
-        otpMaxAttempts: env.otpMaxAttempts,
-        autoCompleteMinutes: env.autoCompleteMinutes,
-        updatedAt: now,
-      },
-      {merge: true},
-    );
+    const current = snap.data() ?? {};
+    const defaults: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries({
+      adminTelegramUsername: env.adminTelegramUsername,
+      adminTelegramChatId: env.adminTelegramChatId,
+      duitNowQrStoragePath: env.duitNowQrStoragePath,
+      smsProvider: env.smsProvider,
+      mockPhoneNumber: env.mockPhoneNumber,
+      mockOtp: env.mockOtp,
+      otpCooldownSeconds: env.otpCooldownSeconds,
+      otpMaxAttempts: env.otpMaxAttempts,
+      autoCompleteMinutes: env.autoCompleteMinutes,
+    })) {
+      if (current[key] === undefined || current[key] === "") {
+        defaults[key] = value;
+      }
+    }
+    if (Object.keys(defaults).length) {
+      await ref.set({...defaults, updatedAt: now}, {merge: true});
+    }
     return;
   }
   await ref.set({
@@ -57,6 +64,12 @@ export const getAppSettings = async (): Promise<AppSettings> => {
   const snap = await db.collection("settings").doc("app").get();
   return {
     isMaintenanceMode: Boolean(snap.get("isMaintenanceMode")),
+    adminTelegramUsername: String(
+      snap.get("adminTelegramUsername") ?? env.adminTelegramUsername,
+    ),
+    adminTelegramChatId: String(
+      snap.get("adminTelegramChatId") ?? env.adminTelegramChatId,
+    ),
     mockPhoneNumber: String(snap.get("mockPhoneNumber") ?? env.mockPhoneNumber),
     mockOtp: String(snap.get("mockOtp") ?? env.mockOtp),
     otpCooldownSeconds: Number(

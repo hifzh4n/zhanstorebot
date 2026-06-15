@@ -66,6 +66,7 @@ export const setupTelegramBot = onRequest(async (_request, response) => {
   await bot.api.setMyCommands([
     {command: "start", description: "Start the bot"},
     {command: "products", description: "View voucher products"},
+    {command: "tutorial", description: "View voucher tutorials"},
     {command: "orders", description: "View current order status"},
     {command: "help", description: "Contact admin"},
   ]);

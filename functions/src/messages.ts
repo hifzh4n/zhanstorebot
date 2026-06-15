@@ -21,6 +21,23 @@ export const productMessage = (product: Product): string => {
     "Click below to proceed.";
 };
 
+export const tutorialIntroMessage = "Choose which voucher tutorial you want:";
+
+export const tutorialMessage = (product: Product): string => {
+  return `${product.name} Tutorial\n\n` +
+    "1. Place an order in this bot and complete the DuitNow payment.\n" +
+    "2. Upload your payment proof in the chat.\n" +
+    "3. Wait for admin approval.\n" +
+    "4. After approval, the bot will send you a Malaysia phone number.\n" +
+    `5. Open the ${product.brand} app or website.\n` +
+    "6. Choose login/register with phone number.\n" +
+    "7. Enter the phone number from the bot.\n" +
+    "8. Request OTP in the app or website.\n" +
+    "9. Return to this bot and tap Check OTP.\n" +
+    "10. Use the OTP in the app before it expires.\n\n" +
+    "If you are stuck, contact admin from the button below.";
+};
+
 export const paymentMessage = (order: Order): string => {
   return "Order Created\n\n" +
     `Order ID: ${order.orderId}\n` +

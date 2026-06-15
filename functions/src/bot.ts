@@ -7,6 +7,7 @@ import {
   paymentKeyboard,
   productDetailKeyboard,
   productsKeyboard,
+  tutorialsKeyboard,
 } from "./keyboards";
 import {
   activeOrderMessage,
@@ -17,6 +18,8 @@ import {
   paymentMessage,
   productMessage,
   proofReceivedMessage,
+  tutorialIntroMessage,
+  tutorialMessage,
   waitingApprovalMessage,
   welcomeMessage,
 } from "./messages";
@@ -64,6 +67,13 @@ const showProducts = async (ctx: Context): Promise<void> => {
   });
 };
 
+const showTutorials = async (ctx: Context): Promise<void> => {
+  const products = await listActiveProducts();
+  await ctx.reply(tutorialIntroMessage, {
+    reply_markup: tutorialsKeyboard(products),
+  });
+};
+
 const requireUser = (ctx: Context): NonNullable<Context["from"]> => {
   if (!ctx.from) {
     throw new Error("Telegram user is missing from context");
@@ -107,6 +117,38 @@ bot.command("orders", async (ctx) => {
   await ctx.reply(ordersListMessage(orders));
 });
 
+bot.command("tutorial", async (ctx) => {
+  const user = requireUser(ctx);
+  await upsertUser(user);
+  await showTutorials(ctx);
+});
+
+bot.command("admin_subscribe", async (ctx) => {
+  const user = requireUser(ctx);
+  const settings = await getAppSettings();
+  const allowedUsername = settings.adminTelegramUsername
+    .replace("@", "")
+    .toLowerCase();
+  const username = (user.username ?? "").toLowerCase();
+  if (!allowedUsername || username !== allowedUsername) {
+    await ctx.reply("Only the configured admin account can subscribe this chat.");
+    return;
+  }
+  if (!ctx.chat) {
+    await ctx.reply(errorMessage);
+    return;
+  }
+  await db.collection("settings").doc("app").set(
+    {
+      adminTelegramChatId: String(ctx.chat.id),
+      adminTelegramUsername: settings.adminTelegramUsername,
+      updatedAt: Timestamp.now(),
+    },
+    {merge: true},
+  );
+  await ctx.reply("Admin notifications are now connected to this chat.");
+});
+
 bot.command("help", async (ctx) => {
   await ctx.reply(helpMessage);
 });
@@ -114,6 +156,23 @@ bot.command("help", async (ctx) => {
 bot.callbackQuery("nav:products", async (ctx) => {
   await ctx.answerCallbackQuery();
   await showProducts(ctx);
+});
+
+bot.callbackQuery("nav:tutorials", async (ctx) => {
+  await ctx.answerCallbackQuery();
+  await showTutorials(ctx);
+});
+
+bot.callbackQuery(/^tutorial:(.+)$/, async (ctx) => {
+  await ctx.answerCallbackQuery();
+  const product = await getProduct(ctx.match[1]);
+  if (!product || !product.isActive) {
+    await ctx.reply("Sorry, this tutorial is temporarily unavailable.");
+    return;
+  }
+  await ctx.reply(tutorialMessage(product), {
+    reply_markup: productDetailKeyboard(product.id),
+  });
 });
 
 bot.callbackQuery(/^product:(.+)$/, async (ctx) => {

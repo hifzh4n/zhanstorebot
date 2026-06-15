@@ -8,6 +8,18 @@ export const productsKeyboard = (products: Product[]): InlineKeyboard => {
   products.forEach((product) => {
     keyboard.text(product.name, `product:${product.id}`).row();
   });
+  keyboard.text("Tutorial", "nav:tutorials").row();
+  keyboard.url("Contact Admin", `https://t.me/${env.adminTelegramUsername
+    .replace("@", "")}`);
+  return keyboard;
+};
+
+export const tutorialsKeyboard = (products: Product[]): InlineKeyboard => {
+  const keyboard = new InlineKeyboard();
+  products.forEach((product) => {
+    keyboard.text(product.name, `tutorial:${product.id}`).row();
+  });
+  keyboard.text("Back to Products", "nav:products").row();
   keyboard.url("Contact Admin", `https://t.me/${env.adminTelegramUsername
     .replace("@", "")}`);
   return keyboard;
@@ -16,6 +28,8 @@ export const productsKeyboard = (products: Product[]): InlineKeyboard => {
 export const productDetailKeyboard = (productId: string): InlineKeyboard => {
   return new InlineKeyboard()
     .text("Proceed to Payment", `payment:proceed:${productId}`)
+    .row()
+    .text("View Tutorial", `tutorial:${productId}`)
     .row()
     .text("Back to Products", "nav:products")
     .row()
