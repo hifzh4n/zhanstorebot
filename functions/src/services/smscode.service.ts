@@ -115,36 +115,42 @@ export class SmsCodeService implements SmsProvider {
     success: false;
     errorMessage: string;
   }> {
-    const searchParams = new URLSearchParams({
-      sort: "price_desc",
-      limit: "10000",
-      page: "1",
-    });
-    const result = await this.request<SmsCodeCatalogProduct[]>(
-      `/catalog/products?${searchParams.toString()}`,
-      {method: "GET"},
-    );
-    if (!result.success) {
-      return result;
-    }
+    const limit = 10000;
+    for (let page = 1; page <= 20; page++) {
+      const searchParams = new URLSearchParams({
+        sort: "price_desc",
+        limit: String(limit),
+        page: String(page),
+      });
+      const result = await this.request<SmsCodeCatalogProduct[]>(
+        `/catalog/products?${searchParams.toString()}`,
+        {method: "GET"},
+      );
+      if (!result.success) {
+        return result;
+      }
 
-    const product = result.data.find((item) => {
-      const withinMaxPrice = !params.smsCodeMaxPrice ||
-        item.price <= params.smsCodeMaxPrice;
-      return item.catalog_product_id === params.smsCodeCatalogProductId &&
-        item.active &&
-        item.available > 0 &&
-        withinMaxPrice;
-    });
-    if (!product) {
-      return {
-        success: false,
-        errorMessage: `No available highest-price SMSCode offer found for ${params.serviceName}.`,
-      };
+      const product = result.data.find((item) => {
+        const withinMaxPrice = !params.smsCodeMaxPrice ||
+          item.price <= params.smsCodeMaxPrice;
+        return item.catalog_product_id === params.smsCodeCatalogProductId &&
+          item.active &&
+          item.available > 0 &&
+          withinMaxPrice;
+      });
+      if (product) {
+        return {
+          success: true,
+          productId: product.id,
+        };
+      }
+      if (result.data.length < limit) {
+        break;
+      }
     }
     return {
-      success: true,
-      productId: product.id,
+      success: false,
+      errorMessage: `No available highest-price SMSCode offer found for ${params.serviceName}.`,
     };
   }
 
