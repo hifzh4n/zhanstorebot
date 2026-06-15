@@ -33,7 +33,7 @@ export default function ProductsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] border-collapse text-sm">
-              <thead className="bg-[var(--panel-muted)] text-left">
+              <thead className="bg-[var(--table-header)] text-left text-[var(--table-header-foreground)]">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Product</th>
                   <th className="px-4 py-3 font-semibold">Service</th>

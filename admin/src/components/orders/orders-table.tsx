@@ -53,7 +53,7 @@ export function OrdersTable({orders}: {orders: Order[]}) {
       </div>
       <div className="overflow-x-auto rounded-lg border border-[var(--border)]">
         <table className="w-full min-w-[850px] text-sm">
-          <thead className="bg-slate-100 text-left dark:bg-slate-800">
+          <thead className="bg-[var(--table-header)] text-left text-[var(--table-header-foreground)]">
             <tr>
               <th className="p-3">Order ID</th>
               <th className="p-3">User</th>

@@ -5,6 +5,8 @@
   --foreground: #172033;
   --panel: #ffffff;
   --panel-muted: #f1f5f4;
+  --table-header: #eef3f6;
+  --table-header-foreground: #263244;
   --muted: #667085;
   --border: #d8dee8;
   --primary: #0f766e;
@@ -19,6 +21,8 @@
   --foreground: #e7eaee;
   --panel: #171c22;
   --panel-muted: #1f262e;
+  --table-header: #1f2937;
+  --table-header-foreground: #e7eaee;
   --muted: #9aa4b2;
   --border: #2b333d;
   --primary: #5eead4;

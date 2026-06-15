@@ -21,7 +21,7 @@ export default function LogsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[860px] text-sm">
-              <thead className="bg-[var(--panel-muted)] text-left">
+              <thead className="bg-[var(--table-header)] text-left text-[var(--table-header-foreground)]">
                 <tr>
                   <th className="p-3">Action</th>
                   <th className="p-3">Message</th>
