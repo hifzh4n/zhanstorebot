@@ -91,6 +91,8 @@ export default function ProductDetailPage() {
             <h2 className="text-lg font-semibold">Summary</h2>
             <Row label="Product ID" value={product.id} />
             <Row label="Price" value={formatMoney(product.price)} />
+            <Row label="SMSCode catalog ID" value={product.smsCodeCatalogProductId ? String(product.smsCodeCatalogProductId) : "-"} />
+            <Row label="SMSCode max price" value={product.smsCodeMaxPrice ? String(product.smsCodeMaxPrice) : "-"} />
             <Row label="Storage path" value={product.imageStoragePath ?? "-"} />
           </Card>
         </div>

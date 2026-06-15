@@ -8,6 +8,7 @@ import {db} from "./firebase";
 import {otpKeyboard, rejectedKeyboard} from "./keyboards";
 import {approvedMessage, rejectedMessage} from "./messages";
 import {MockSmsService} from "./services/mock-sms.service";
+import {SmsCodeService} from "./services/smscode.service";
 import {
   addOrderLog,
   getOrder,
@@ -101,9 +102,10 @@ export const approvePayment = onCall(async (request) => {
     message: "Payment approved",
   });
 
-  const smsProvider = new MockSmsService();
+  const smsProvider = envSmsProvider();
   const result = await smsProvider.requestNumber({
     serviceName: order.serviceName,
+    smsCodeCatalogProductId: order.smsCodeCatalogProductId,
     country: "malaysia",
     orderId,
   });
@@ -129,6 +131,12 @@ export const approvePayment = onCall(async (request) => {
   }
   return {ok: true};
 });
+
+const envSmsProvider = () => {
+  return process.env.SMS_PROVIDER === "smscode" ?
+    new SmsCodeService() :
+    new MockSmsService();
+};
 
 export const rejectPayment = onCall(async (request) => {
   const admin = await verifyAdmin(request.auth);
@@ -183,6 +191,8 @@ export const updateProduct = onCall(async (request) => {
     "serviceName",
     "isActive",
     "imageStoragePath",
+    "smsCodeCatalogProductId",
+    "smsCodeMaxPrice",
   ]) {
     if (key in data) allowed[key] = data[key];
   }
@@ -243,6 +253,8 @@ export const createProduct = onCall(async (request) => {
     description,
     imageUrl: "",
     imageStoragePath: "",
+    smsCodeCatalogProductId: Number(data.smsCodeCatalogProductId) || null,
+    smsCodeMaxPrice: Number(data.smsCodeMaxPrice) || null,
     isActive: Boolean(data.isActive ?? true),
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),

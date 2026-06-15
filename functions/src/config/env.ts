@@ -18,6 +18,10 @@ export const env = {
     process.env.ADMIN_PANEL_URL ?? "https://your-domain.com",
   ),
   smsProvider: process.env.SMS_PROVIDER ?? "mock",
+  smscodeApiToken: process.env.SMSCODE_API_TOKEN ?? "",
+  smscodeBaseUrl: trimTrailingSlash(
+    process.env.SMSCODE_BASE_URL ?? "https://api.smscode.gg/v1",
+  ),
   mockPhoneNumber: process.env.MOCK_PHONE_NUMBER ?? "+60123456789",
   mockOtp: process.env.MOCK_OTP ?? "123456",
   otpCooldownSeconds: readNumber("OTP_COOLDOWN_SECONDS", 15),

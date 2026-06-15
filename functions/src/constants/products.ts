@@ -10,6 +10,7 @@ export const PRODUCTS: Product[] = [
     currency: "MYR",
     description: "ZUS Coffee Buy 1 Free 1 Voucher.",
     imageUrl: "",
+    smsCodeCatalogProductId: 15355,
     isActive: true,
   },
   {
@@ -21,6 +22,7 @@ export const PRODUCTS: Product[] = [
     currency: "MYR",
     description: "Tealive Buy 1 Free 1 Voucher.",
     imageUrl: "",
+    smsCodeCatalogProductId: 16455,
     isActive: true,
   },
 ];

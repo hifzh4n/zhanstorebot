@@ -56,8 +56,9 @@ export default function OrderDetailsPage() {
           <Card>
             <h2 className="mb-4 text-lg font-semibold">OTP / Phone Info</h2>
             <dl className="grid gap-3 text-sm">
-              <Row label="SMS Provider" value={order.smsProvider} />
-              <Row label="SMS Order ID" value={order.smsOrderId ?? "-"} />
+            <Row label="SMS Provider" value={order.smsProvider} />
+            <Row label="SMSCode Catalog ID" value={order.smsCodeCatalogProductId ? String(order.smsCodeCatalogProductId) : "-"} />
+            <Row label="SMS Order ID" value={order.smsOrderId ?? "-"} />
               <Row label="Phone Number" value={order.phoneNumber ?? "-"} />
               <Row label="OTP Code" value={order.otpCode ?? "-"} />
               <Row label="OTP Attempts" value={String(order.otpAttempts ?? 0)} />

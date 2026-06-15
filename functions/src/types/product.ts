@@ -7,5 +7,7 @@ export interface Product {
   currency: "MYR";
   description: string;
   imageUrl: string;
+  smsCodeCatalogProductId?: number;
+  smsCodeMaxPrice?: number;
   isActive: boolean;
 }

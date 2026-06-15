@@ -36,6 +36,7 @@ import {getProduct, listActiveProducts} from "./services/product.service";
 import {upsertUser} from "./services/user.service";
 import {MockSmsService} from "./services/mock-sms.service";
 import {SmsProvider} from "./services/sms-provider.interface";
+import {SmsCodeService} from "./services/smscode.service";
 import {notifyAdminPaymentProof} from "./services/admin-notification.service";
 import {recordPaymentProof} from "./services/payment-proof.service";
 import {readStorageFile, savePaymentProof} from "./services/storage.service";
@@ -51,7 +52,9 @@ import {db} from "./firebase";
 const botToken = env.telegramBotToken || "0000000000:missing-token";
 
 export const bot = new Bot(botToken);
-const smsProvider: SmsProvider = new MockSmsService();
+const smsProvider: SmsProvider = env.smsProvider === "smscode" ?
+  new SmsCodeService() :
+  new MockSmsService();
 
 bot.use(async (_ctx, next) => {
   if (!env.telegramBotToken) {

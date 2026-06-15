@@ -1,6 +1,8 @@
 export interface SmsProvider {
   requestNumber(params: {
     serviceName: string;
+    smsCodeCatalogProductId: number | null;
+    smsCodeMaxPrice?: number | null;
     country: "malaysia";
     orderId: string;
   }): Promise<{

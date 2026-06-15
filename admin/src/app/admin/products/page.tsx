@@ -39,6 +39,7 @@ export default function ProductsPage() {
                   <th className="px-4 py-3 font-semibold">Service</th>
                   <th className="px-4 py-3 font-semibold">Brand</th>
                   <th className="px-4 py-3 font-semibold">Price</th>
+                  <th className="px-4 py-3 font-semibold">SMSCode</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
                   <th className="px-4 py-3 text-right font-semibold">Action</th>
                 </tr>
@@ -58,6 +59,7 @@ export default function ProductsPage() {
                     <td className="px-4 py-3 text-[var(--muted)]">{product.serviceName}</td>
                     <td className="px-4 py-3 text-[var(--muted)]">{product.brand}</td>
                     <td className="px-4 py-3 font-medium">{formatMoney(product.price)}</td>
+                    <td className="px-4 py-3 text-[var(--muted)]">{product.smsCodeCatalogProductId ?? "-"}</td>
                     <td className="px-4 py-3">
                       <OrderStatusBadge status={product.isActive ? "ACTIVE" : "CANCELLED"} />
                     </td>
@@ -73,7 +75,7 @@ export default function ProductsPage() {
                 ))}
                 {!products.length ? (
                   <tr>
-                    <td className="p-6 text-center text-[var(--muted)]" colSpan={6}>No products found.</td>
+                    <td className="p-6 text-center text-[var(--muted)]" colSpan={7}>No products found.</td>
                   </tr>
                 ) : null}
               </tbody>

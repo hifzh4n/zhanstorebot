@@ -8,5 +8,7 @@ export interface Product {
   description: string;
   imageUrl?: string;
   imageStoragePath?: string;
+  smsCodeCatalogProductId?: number;
+  smsCodeMaxPrice?: number;
   isActive: boolean;
 }

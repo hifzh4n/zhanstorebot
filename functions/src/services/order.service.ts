@@ -78,6 +78,7 @@ export const createOrder = async (params: {
     productName: params.product.name,
     brand: params.product.brand,
     serviceName: params.product.serviceName,
+    smsCodeCatalogProductId: params.product.smsCodeCatalogProductId ?? null,
     price: params.product.price,
     currency: params.product.currency,
     status: "WAITING_PAYMENT",

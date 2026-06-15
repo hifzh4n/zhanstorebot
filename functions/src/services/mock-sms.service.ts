@@ -4,6 +4,8 @@ import {getAppSettings} from "./settings.service";
 export class MockSmsService implements SmsProvider {
   async requestNumber(params: {
     serviceName: string;
+    smsCodeCatalogProductId: number | null;
+    smsCodeMaxPrice?: number | null;
     country: "malaysia";
     orderId: string;
   }): Promise<{

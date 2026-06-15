@@ -10,6 +10,7 @@ export interface Order {
   productName: string;
   brand: string;
   serviceName: string;
+  smsCodeCatalogProductId: number | null;
   price: number;
   currency: "MYR";
   status: OrderStatus;

@@ -19,6 +19,8 @@ export default function NewProductPage() {
     brand: "",
     serviceName: "",
     price: 2.5,
+    smsCodeCatalogProductId: "",
+    smsCodeMaxPrice: "",
     description: "",
     isActive: true,
   });
@@ -30,7 +32,13 @@ export default function NewProductPage() {
     }
     setLoading(true);
     try {
-      const result = await createProduct({data: form});
+      const result = await createProduct({
+        data: {
+          ...form,
+          smsCodeCatalogProductId: Number(form.smsCodeCatalogProductId) || null,
+          smsCodeMaxPrice: Number(form.smsCodeMaxPrice) || null,
+        },
+      });
       toast.success("Product created.");
       router.replace(`/admin/products/${result.data.productId}`);
     } catch {
@@ -57,6 +65,8 @@ export default function NewProductPage() {
           <Field label="Brand" value={form.brand} onChange={(value) => setForm({...form, brand: value})} />
           <Field label="Service name" value={form.serviceName} onChange={(value) => setForm({...form, serviceName: value})} />
           <Field label="Price" type="number" value={form.price} onChange={(value) => setForm({...form, price: Number(value)})} />
+          <Field label="SMSCode catalog product ID" type="number" value={form.smsCodeCatalogProductId} onChange={(value) => setForm({...form, smsCodeCatalogProductId: value})} />
+          <Field label="SMSCode max price IDR" type="number" value={form.smsCodeMaxPrice} onChange={(value) => setForm({...form, smsCodeMaxPrice: value})} />
           <label className="flex items-center gap-2 pt-7 text-sm font-medium">
             <input
               type="checkbox"

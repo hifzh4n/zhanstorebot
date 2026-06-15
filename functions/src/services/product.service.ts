@@ -17,6 +17,17 @@ export const seedProducts = async (): Promise<void> => {
           createdAt: now,
           updatedAt: now,
         });
+        return;
+      }
+      const existing = snap.data() ?? {};
+      const defaults: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(product)) {
+        if (existing[key] === undefined || existing[key] === "") {
+          defaults[key] = value;
+        }
+      }
+      if (Object.keys(defaults).length) {
+        await ref.set({...defaults, updatedAt: now}, {merge: true});
       }
     }),
   );
