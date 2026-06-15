@@ -1,0 +1,20 @@
+export const orderStatuses = [
+  "ALL",
+  "CREATED",
+  "WAITING_PAYMENT",
+  "WAITING_PROOF",
+  "WAITING_ADMIN_APPROVAL",
+  "PAYMENT_APPROVED",
+  "PAYMENT_REJECTED",
+  "REQUESTING_NUMBER",
+  "NUMBER_READY",
+  "WAITING_OTP",
+  "OTP_RECEIVED",
+  "OTP_ATTEMPT_LIMIT_REACHED",
+  "COMPLETED",
+  "AUTO_COMPLETED",
+  "FAILED",
+  "CANCELLED",
+] as const;
+
+export const currency = process.env.NEXT_PUBLIC_CURRENCY ?? "MYR";

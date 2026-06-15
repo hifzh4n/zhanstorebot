@@ -1,0 +1,29 @@
+export interface Order {
+  orderId: string;
+  telegramUserId: string;
+  telegramUsername: string | null;
+  telegramChatId: string;
+  productId: string;
+  productName: string;
+  brand: string;
+  serviceName: string;
+  price: number;
+  currency: "MYR";
+  status: string;
+  paymentProofUrl: string | null;
+  paymentProofStoragePath: string | null;
+  paymentProofFileType: string | null;
+  paymentUploadedAt: unknown;
+  rejectionReason: string | null;
+  rejectedAt: unknown;
+  approvedAt: unknown;
+  smsProvider: string;
+  smsOrderId: string | null;
+  phoneNumber: string | null;
+  otpCode: string | null;
+  otpAttempts: number;
+  lastOtpCheckAt: unknown;
+  autoCompleteAt: unknown;
+  createdAt: unknown;
+  updatedAt: unknown;
+}

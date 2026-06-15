@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f7f9;
+  --foreground: #172033;
+  --panel: #ffffff;
+  --panel-muted: #f1f5f4;
+  --muted: #667085;
+  --border: #d8dee8;
+  --primary: #0f766e;
+  --primary-soft: #dff7f3;
+  --surface-hover: #edf2f5;
+  --primary-foreground: #ffffff;
+  --danger: #dc2626;
+}
+
+.dark {
+  --background: #101418;
+  --foreground: #e7eaee;
+  --panel: #171c22;
+  --panel-muted: #1f262e;
+  --muted: #9aa4b2;
+  --border: #2b333d;
+  --primary: #5eead4;
+  --primary-soft: #123d38;
+  --surface-hover: #222a33;
+  --primary-foreground: #062522;
+  --danger: #f87171;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+button, input, textarea, select {
+  font: inherit;
+}

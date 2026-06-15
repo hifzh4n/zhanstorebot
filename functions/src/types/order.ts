@@ -1,0 +1,39 @@
+import {Timestamp} from "firebase-admin/firestore";
+import {OrderStatus} from "../constants/statuses";
+
+export interface Order {
+  orderId: string;
+  telegramUserId: string;
+  telegramUsername: string | null;
+  telegramChatId: string;
+  productId: string;
+  productName: string;
+  brand: string;
+  serviceName: string;
+  price: number;
+  currency: "MYR";
+  status: OrderStatus;
+  paymentMethod: "DUITNOW_QR";
+  paymentProofUrl: string | null;
+  paymentProofStoragePath: string | null;
+  paymentProofFileType: string | null;
+  paymentUploadedAt: Timestamp | null;
+  rejectionReason: string | null;
+  rejectedAt: Timestamp | null;
+  rejectedBy: string | null;
+  approvedAt: Timestamp | null;
+  approvedBy: string | null;
+  smsProvider: string;
+  smsOrderId: string | null;
+  phoneNumber: string | null;
+  otpCode: string | null;
+  otpAttempts: number;
+  lastOtpCheckAt: Timestamp | null;
+  otpReceivedAt: Timestamp | null;
+  autoCompleteAt: Timestamp | null;
+  completedAt: Timestamp | null;
+  cancelledAt: Timestamp | null;
+  errorMessage: string | null;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
