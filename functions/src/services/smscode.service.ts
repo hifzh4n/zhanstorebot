@@ -25,6 +25,14 @@ interface SmsCodeOrderResponse {
   failed_reason?: string | null;
 }
 
+interface SmsCodeCatalogProduct {
+  id: number;
+  catalog_product_id: number;
+  available: number;
+  price: number;
+  active: boolean;
+}
+
 export class SmsCodeService implements SmsProvider {
   async requestNumber(params: {
     serviceName: string;
@@ -50,15 +58,20 @@ export class SmsCodeService implements SmsProvider {
         errorMessage: `SMSCode catalog product ID is missing for ${params.serviceName}.`,
       };
     }
+    const smsCodeCatalogProductId = params.smsCodeCatalogProductId;
 
-    const body: Record<string, unknown> = {
-      catalog_product_id: params.smsCodeCatalogProductId,
-      quantity: 1,
-      policy: "cheapest",
-    };
-    if (params.smsCodeMaxPrice) {
-      body.max_price = params.smsCodeMaxPrice;
+    const product = await this.getHighestPricedProduct({
+      serviceName: params.serviceName,
+      smsCodeCatalogProductId,
+      smsCodeMaxPrice: params.smsCodeMaxPrice,
+    });
+    if (!product.success) {
+      return product;
     }
+    const body: Record<string, unknown> = {
+      product_id: product.productId,
+      quantity: 1,
+    };
 
     const result = await this.request<SmsCodeCreateResponse>(
       "/orders/create",
@@ -88,6 +101,50 @@ export class SmsCodeService implements SmsProvider {
       success: true,
       smsOrderId: String(order.id),
       phoneNumber: order.phone_number,
+    };
+  }
+
+  private async getHighestPricedProduct(params: {
+    serviceName: string;
+    smsCodeCatalogProductId: number;
+    smsCodeMaxPrice?: number | null;
+  }): Promise<{
+    success: true;
+    productId: number;
+  } | {
+    success: false;
+    errorMessage: string;
+  }> {
+    const searchParams = new URLSearchParams({
+      sort: "price_desc",
+      limit: "10000",
+      page: "1",
+    });
+    const result = await this.request<SmsCodeCatalogProduct[]>(
+      `/catalog/products?${searchParams.toString()}`,
+      {method: "GET"},
+    );
+    if (!result.success) {
+      return result;
+    }
+
+    const product = result.data.find((item) => {
+      const withinMaxPrice = !params.smsCodeMaxPrice ||
+        item.price <= params.smsCodeMaxPrice;
+      return item.catalog_product_id === params.smsCodeCatalogProductId &&
+        item.active &&
+        item.available > 0 &&
+        withinMaxPrice;
+    });
+    if (!product) {
+      return {
+        success: false,
+        errorMessage: `No available highest-price SMSCode offer found for ${params.serviceName}.`,
+      };
+    }
+    return {
+      success: true,
+      productId: product.id,
     };
   }
 
