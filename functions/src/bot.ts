@@ -63,6 +63,24 @@ bot.use(async (_ctx, next) => {
   await next();
 });
 
+bot.use(async (ctx, next) => {
+  const updateId = ctx.update.update_id;
+  const ref = db.collection("telegramUpdates").doc(String(updateId));
+  try {
+    await ref.create({
+      updateId,
+      createdAt: Timestamp.now(),
+    });
+  } catch (error) {
+    const code = (error as {code?: number | string}).code;
+    if (code === 6 || code === "already-exists") {
+      return;
+    }
+    throw error;
+  }
+  await next();
+});
+
 const showProducts = async (ctx: Context): Promise<void> => {
   const products = await listActiveProducts();
   await ctx.reply(welcomeMessage, {
